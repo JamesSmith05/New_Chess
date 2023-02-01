@@ -27,7 +27,7 @@ public class piece {
 
     public boolean validMoveOutOfCheckB(){
         if (Board.checkB){
-            if(Board.checkCheck()){
+            if(Board.checkCheckB()){
                 return false;
             }
             else {
@@ -38,7 +38,7 @@ public class piece {
     }
     public boolean validMoveOutOfCheckW(){
         if (Board.checkW){
-            if(Board.checkCheck()){
+            if(Board.checkCheckW()){
                 return false;
             }
             else {
@@ -235,9 +235,8 @@ public class piece {
         }
 
         if(canMove){
-            if(willKill){
-                Board.getPiece(xp * 64, yp * 64).kill(); //when a piece is onto of another piece it will call kill to remove the piece from a board
-            }
+            int savedLocationX=this.column;
+            int savedLocationY=this.row;
             this.column=xp;
             this.row=yp;
             x=column*64;
@@ -249,8 +248,8 @@ public class piece {
                 canMove = this.validMoveOutOfCheckB();
             }
 
-            this.column=Board.selectedPieceOriginalXP;
-            this.row=Board.selectedPieceOriginalYP;
+            this.column=savedLocationX;
+            this.row=savedLocationY;
             x=column*64;
             y=row*64;
         }

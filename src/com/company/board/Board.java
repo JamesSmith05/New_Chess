@@ -50,7 +50,7 @@ public class Board extends JPanel {
         timerB = 600;
         JFrame frame = new JFrame();
         frame.setUndecorated(true);
-        frame.setBounds(2500, 300, 512, 582); //creates window and sets the boundaries
+        frame.setBounds(-800, 500, 532, 582); //creates window and sets the boundaries
 
         for(int x = 0; x < 8; x++) { //loops through both x and y-axis and uses boolean
             for (int y = 0; y < 8; y++) {//to set square to black of white depending on the boolean
@@ -82,26 +82,42 @@ public class Board extends JPanel {
                 white = !white;
             }
 
-            for (int i = 0; i < ps.size(); i++) {
-                g.drawImage(ps.get(i).image,(ps.get(i).column)*64,ps.get(i).row*64,null);
-            }
-            g.setFont(new Font("Arial", Font.PLAIN, 20)); //sets font for timer
-            g.setColor(Color.BLACK);
-            String secondValue;
-            if((timerW%60)<10){
-                secondValue = "0"+(timerW%60);
-            }
-            else{
-                secondValue = ""+(timerW%60);
-            }
-            g.drawString(("White" + (timerW / 60) + ":" + secondValue),10,560);  //draws the exact time and uses constructor to display minutes and seconds
-            if((timerB%60)<10){
-                secondValue = "0"+(timerB%60);
-            }
-            else{
-                secondValue = ""+(timerB%60);
-            }
-            g.drawString(("Black" + (timerB / 60) + ":" + secondValue),280,560);
+                for (int i = 0; i < ps.size(); i++) {
+                    g.drawImage(ps.get(i).image, (ps.get(i).column) * 64, ps.get(i).row * 64, null);
+                }
+                g.setColor(new Color(161, 161, 161));
+                g.fillRect(512,0,20,512);
+                g.fillRect(0,512,532,70);
+
+                g.setFont(new Font("Arial", Font.PLAIN, 20)); //sets font for timer
+                g.setColor(Color.BLACK);
+                String secondValue;
+                if ((timerW % 60) < 10) {
+                    secondValue = "0" + (timerW % 60);
+                } else {
+                    secondValue = "" + (timerW % 60);
+                }
+                g.drawString(("White" + (timerW / 60) + ":" + secondValue), 70, 560);  //draws the exact time and uses constructor to display minutes and seconds
+                if ((timerB % 60) < 10) {
+                    secondValue = "0" + (timerB % 60);
+                } else {
+                    secondValue = "" + (timerB % 60);
+                }
+                g.drawString(("Black" + (timerB / 60) + ":" + secondValue), 340, 560);
+
+                for (int i = 0; i < 8; i++) {
+                    g.drawString(String.valueOf(i),517,(i*64)+38);
+                }
+                for (int i = 0; i < 8; i++) {
+                    g.drawString(String.valueOf(i),(i*64)+28,537);
+                }
+                g.setFont(new Font("Arial", Font.PLAIN, 70)); //sets font for timer
+                if (checkMateW) {
+                    g.drawString("Black Wins", 100, 256);
+                }
+                if (checkMateB) {
+                    g.drawString("White Wins", 100, 256);
+                }
         }};
 
 
@@ -205,36 +221,60 @@ public class Board extends JPanel {
         }
     }
 
-    public static boolean checkCheck(){
+    public static boolean checkCheckB(){
         boolean returnValue = false;
         checkB = false;
-        checkW = false;
         int savedOriginalX = selectedPieceOriginalXP, savedOriginalY = selectedPieceOriginalYP;
-        piece whiteKing = null,blackKing = null,tempPiece;
+        piece blackKing = null,tempPiece;
         for (int i = 0; i < ps.size(); i++) {
             tempPiece = ps.get(i);
-                if(Objects.equals(tempPiece.name, "king")) {
-                    if (tempPiece.isWhite) {
-                        whiteKing = tempPiece;
-                    } else {
-                        blackKing = tempPiece;
-                    }
+            if(Objects.equals(tempPiece.name, "king")) {
+                if (!tempPiece.isWhite) {
+                    blackKing = tempPiece;
                 }
+            }
         }
         for (int i = 0; i < ps.size(); i++) {
             tempPiece = ps.get(i);
             selectedPieceOriginalXP = tempPiece.x/64;
             selectedPieceOriginalYP = tempPiece.y/64;
             if(tempPiece.isWhite){
+                assert blackKing != null;
                 if(tempPiece.validMove(blackKing.x/64,blackKing.y/64, true, true)){
-                    piecesThatCauseCheckForB.add(i);
+                    System.out.println("this be the square of check for the king "+ blackKing.x/64 + " " + blackKing.y/64 + " " + tempPiece.name);
                     checkB = true;
                     returnValue = true;
                 }
             }
-            else{
+        }
+
+        selectedPieceOriginalXP = savedOriginalX;
+        selectedPieceOriginalYP = savedOriginalY;
+
+        return returnValue;
+    }
+
+    public static boolean checkCheckW(){
+        boolean returnValue = false;
+        checkW = false;
+        int savedOriginalX = selectedPieceOriginalXP, savedOriginalY = selectedPieceOriginalYP;
+        piece whiteKing = null,tempPiece;
+        for (int i = 0; i < ps.size(); i++) {
+            tempPiece = ps.get(i);
+            if(Objects.equals(tempPiece.name, "king")) {
+                if (tempPiece.isWhite) {
+                    whiteKing = tempPiece;
+                }
+            }
+        }
+        for (int i = 0; i < ps.size(); i++) {
+            tempPiece = ps.get(i);
+            selectedPieceOriginalXP = tempPiece.x/64;
+            selectedPieceOriginalYP = tempPiece.y/64;
+            if(!tempPiece.isWhite){
+                assert whiteKing != null;
                 if(tempPiece.validMove(whiteKing.x/64,whiteKing.y/64, false, true)){
-                    piecesThatCauseCheckForW.add(i);
+                    System.out.println(tempPiece.name + " takes white king");
                     checkW = true;
                     returnValue = true;
                 }
@@ -247,8 +287,52 @@ public class Board extends JPanel {
         return returnValue;
     }
 
-    static ArrayList<Integer> piecesThatCauseCheckForB = new ArrayList<>();
-    static ArrayList<Integer> piecesThatCauseCheckForW = new ArrayList<>();
+    public static boolean checkCheck(){
+        boolean returnValue = false;
+        returnValue = checkCheckB();
+        if (!returnValue){
+            returnValue = checkCheckW();
+        }
+//        checkB = false;
+//        checkW = false;
+//        int savedOriginalX = selectedPieceOriginalXP, savedOriginalY = selectedPieceOriginalYP;
+//        piece whiteKing = null,blackKing = null,tempPiece;
+//        for (int i = 0; i < ps.size(); i++) {
+//            tempPiece = ps.get(i);
+//                if(Objects.equals(tempPiece.name, "king")) {
+//                    if (tempPiece.isWhite) {
+//                        whiteKing = tempPiece;
+//                    } else {
+//                        blackKing = tempPiece;
+//                    }
+//                }
+//        }
+//        for (int i = 0; i < ps.size(); i++) {
+//            tempPiece = ps.get(i);
+//            selectedPieceOriginalXP = tempPiece.x/64;
+//            selectedPieceOriginalYP = tempPiece.y/64;
+//            if(tempPiece.isWhite){
+//                System.out.println(tempPiece.name);
+//                if(tempPiece.validMove(blackKing.x/64,blackKing.y/64, true, true)){
+//                    System.out.println("this be the square of check for the king "+ blackKing.x/64 + " " + blackKing.y/64 + " " + tempPiece.name);
+//                    checkB = true;
+//                    returnValue = true;
+//                }
+//            }
+//            else{
+//                if(tempPiece.validMove(whiteKing.x/64,whiteKing.y/64, false, true)){
+//                    System.out.println(tempPiece.name + " takes white king");
+//                    checkW = true;
+//                    returnValue = true;
+//                }
+//            }
+//        }
+//
+//        selectedPieceOriginalXP = savedOriginalX;
+//        selectedPieceOriginalYP = savedOriginalY;
+//
+        return returnValue;
+    }
 
     public static boolean isPossibleMovesToPreventCheckMateW(){
         if(checkW){
@@ -257,8 +341,8 @@ public class Board extends JPanel {
                     if(ps.get(i).isWhite){
                         for (int j = 0; j < 8; j++) {
                             for (int k = 0; k < 8; k++) {
-                                if(ps.get(i).moveForCheckCheck(i,j,true)){
-                                    return false;
+                                if(ps.get(i).moveForCheckCheck(j,k,true)){
+                                    return true;
                                 }
                             }
                         }
@@ -266,7 +350,7 @@ public class Board extends JPanel {
                 }
             }
         }
-        return true;
+        return false;
     }
     public static boolean isPossibleMovesToPreventCheckMateB(){
         if(checkB){
@@ -275,8 +359,8 @@ public class Board extends JPanel {
                     if(!ps.get(i).isWhite){
                         for (int j = 0; j < 8; j++) {
                             for (int k = 0; k < 8; k++) {
-                                if(ps.get(i).moveForCheckCheck(i,j,false)){
-                                    return false;
+                                if(ps.get(i).moveForCheckCheck(j,k,false)){
+                                    return true;
                                 }
                             }
                         }
@@ -284,8 +368,11 @@ public class Board extends JPanel {
                 }
             }
         }
-        return true;
+        return false;
     }
+
+    public static int numberOfCheckW = 0, numberOfMovesW = 0;
+    public static int numberOfMovesB = 0, numberOfCheckB = 0;
 
     public static boolean checkmateCheck(){
         boolean returnValue = false;
@@ -315,8 +402,8 @@ public class Board extends JPanel {
         ArrayList<location> possibleMovesB = new ArrayList<>();
         ArrayList<location> movesWhereCheckB = new ArrayList<>();
 
-        int numberOfCheckW = 0, numberOfMovesW = 0;
-        int numberOfMovesB = 0, numberOfCheckB = 0;
+        numberOfCheckW = 0; numberOfMovesW = 0;
+        numberOfMovesB = 0; numberOfCheckB = 0;
 
         for (int j = -1; j <= 1; j++) {
             for (int k = -1; k <= 1; k++) {
@@ -327,7 +414,7 @@ public class Board extends JPanel {
                             numberOfMovesB +=1;
                             possibleMovesB.add(new location(xp,yp));
                             ps.get(blackKingNumber).setLocation(xp,yp);
-                            if(checkCheck()){
+                            if(checkCheckB()){
                                 numberOfCheckB +=1;
                             }
                             ps.get(blackKingNumber).setLocation(blackKingX,blackKingY);
@@ -337,7 +424,7 @@ public class Board extends JPanel {
                         numberOfMovesB +=1;
                         possibleMovesB.add(new location(xp,yp));
                         ps.get(blackKingNumber).setLocation(xp,yp);
-                        if(checkCheck()){
+                        if(checkCheckB()){
                             numberOfCheckB +=1;
                         }
                         ps.get(blackKingNumber).setLocation(blackKingX,blackKingY);
@@ -355,7 +442,7 @@ public class Board extends JPanel {
                             numberOfMovesW +=1;
                             possibleMovesW.add(new location(xp,yp));
                             ps.get(whiteKingNumber).setLocation(xp,yp);
-                            if(checkCheck()){
+                            if(checkCheckW()){
                                 numberOfCheckW +=1;
                             }
                             ps.get(whiteKingNumber).setLocation(whiteKingX,whiteKingY);
@@ -365,7 +452,7 @@ public class Board extends JPanel {
                         numberOfMovesW +=1;
                         possibleMovesW.add(new location(xp,yp));
                         ps.get(whiteKingNumber).setLocation(xp,yp);
-                        if(checkCheck()){
+                        if(checkCheckW()){
                             numberOfCheckW +=1;
                         }
                         ps.get(whiteKingNumber).setLocation(whiteKingX,whiteKingY);
@@ -377,14 +464,16 @@ public class Board extends JPanel {
         selectedPieceOriginalXP = savedOriginalX;
         selectedPieceOriginalYP = savedOriginalY;
 
-        System.out.println("number of moves = " + numberOfMovesB);
-        System.out.println("number of check = " + numberOfCheckB);
+        System.out.println("number of B moves = " + numberOfMovesB);
+        System.out.println("number of B check = " + numberOfCheckB);
+        System.out.println("number of W moves = " + numberOfMovesW);
+        System.out.println("number of W check = " + numberOfCheckW);
 
         if (numberOfCheckB>0 && numberOfCheckB == numberOfMovesB && !isPossibleMovesToPreventCheckMateB()){
-            returnValue = true;
+            System.out.println("black in checkmate");
         }
         if (numberOfCheckW>0 && numberOfCheckW == numberOfMovesW && !isPossibleMovesToPreventCheckMateW()){
-            returnValue = true;
+            System.out.println("white in checkmate");
         }
 
 
