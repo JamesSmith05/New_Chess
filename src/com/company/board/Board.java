@@ -111,7 +111,7 @@ public class Board extends JPanel {
                 for (int i = 0; i < 8; i++) {
                     g.drawString(String.valueOf(i),(i*64)+28,537);
                 }
-                g.setFont(new Font("Arial", Font.PLAIN, 70)); //sets font for timer
+                g.setFont(new Font("Arial", Font.BOLD, 70)); //sets font for timer
                 if (checkMateW) {
                     g.drawString("Black Wins", 100, 256);
                 }
@@ -125,60 +125,43 @@ public class Board extends JPanel {
         frame.setDefaultCloseOperation(3); //enables you to close the tab
         frame.setVisible(true);
 
-        frame.addMouseMotionListener(new MouseMotionListener() {
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                if (selectedPiece!=null){
-                    selectedPiece.x=e.getX()-32;
-                    selectedPiece.y=e.getY()-32;
-                    frame.repaint();
-                }
-
-            }
-
-            @Override
-            public void mouseMoved(MouseEvent e) {
-
-            }
-        });
-
         frame.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
             }
             @Override
-            public void mousePressed(MouseEvent e) {
+            public void mousePressed(MouseEvent e) {if (!checkMateW && !checkMateB){
                 //System.out.println((getPiece(e.getX(),e.getY()).isWhite?"White":"Black")+getPiece(e.getX(),e.getY()).name);
                 selectedPiece=getPiece(e.getX(),e.getY());
                 selectedPieceOriginalXP = e.getX()/64;
                 selectedPieceOriginalYP = e.getY()/64;
                 //System.out.println(e.getX() + " " + e.getY());
-            }
+            }}
             @Override
-            public void mouseReleased(MouseEvent e) {
+            public void mouseReleased(MouseEvent e) {if (!checkMateW && !checkMateB){
                 if(selectedPiece != null){
-                if (selectedPiece.isWhite == whiteTurn){ //checks if selected piece is white
-                    selectedPiece.move(e.getX()/64,e.getY()/64,selectedPiece.isWhite);
-                    if(pieceMoved){
-                        whiteTurn = !whiteTurn;  //if the piece moved is white "whites turn" will be printed allowing all white pieces to move
-                        if(whiteTurn){
-                            //System.out.println("It is white turn");
-                        } else{
-                            //System.out.println("It is black turn");  //because each piece has the iswhite boolean if its true all white pieces can move and if iswhite is false black can move.
+                    if (selectedPiece.isWhite == whiteTurn){ //checks if selected piece is white
+                        selectedPiece.move(e.getX()/64,e.getY()/64,selectedPiece.isWhite);
+                        if(pieceMoved){
+                            whiteTurn = !whiteTurn;  //if the piece moved is white "whites turn" will be printed allowing all white pieces to move
+                            if(whiteTurn){
+                                //System.out.println("It is white turn");
+                            } else{
+                                //System.out.println("It is black turn");  //because each piece has the iswhite boolean if its true all white pieces can move and if iswhite is false black can move.
+                            }
+                        }
+                        if(Board.checkCheck()){
+                            System.out.println("check");
+                        }
+                        if(Board.checkmateCheck()){
+                            System.out.println("checkmate");
                         }
                     }
-                    if(Board.checkCheck()){
-                        System.out.println("check");
-                    }
-                    if(Board.checkmateCheck()){
-                        System.out.println("checkmate");
-                    }
+                    frame.repaint();
+                    selectedPiece = null;
+                    pieceMoved = false;
                 }
-                frame.repaint();
-                selectedPiece = null;
-                pieceMoved = false;
-            }
-            }
+            }}
 
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -200,12 +183,14 @@ public class Board extends JPanel {
             lastTime = currentTime;
             frame.repaint();
             if (timer >= 1000000000) {
-                if (whiteTurn) {
-                    timerW -= 1;
-                } else {
-                    timerB -= 1;
+                if (!checkMateW && !checkMateB){
+                    if (whiteTurn) {
+                        timerW -= 1;
+                    } else {
+                        timerB -= 1;
+                    }
+                    //System.out.println("FPS:" + drawCount);
                 }
-                //System.out.println("FPS:" + drawCount);
                 timer = 0;
             }
             if (timerW == 0) {
@@ -288,49 +273,11 @@ public class Board extends JPanel {
     }
 
     public static boolean checkCheck(){
-        boolean returnValue = false;
+        boolean returnValue;
         returnValue = checkCheckB();
         if (!returnValue){
             returnValue = checkCheckW();
         }
-//        checkB = false;
-//        checkW = false;
-//        int savedOriginalX = selectedPieceOriginalXP, savedOriginalY = selectedPieceOriginalYP;
-//        piece whiteKing = null,blackKing = null,tempPiece;
-//        for (int i = 0; i < ps.size(); i++) {
-//            tempPiece = ps.get(i);
-//                if(Objects.equals(tempPiece.name, "king")) {
-//                    if (tempPiece.isWhite) {
-//                        whiteKing = tempPiece;
-//                    } else {
-//                        blackKing = tempPiece;
-//                    }
-//                }
-//        }
-//        for (int i = 0; i < ps.size(); i++) {
-//            tempPiece = ps.get(i);
-//            selectedPieceOriginalXP = tempPiece.x/64;
-//            selectedPieceOriginalYP = tempPiece.y/64;
-//            if(tempPiece.isWhite){
-//                System.out.println(tempPiece.name);
-//                if(tempPiece.validMove(blackKing.x/64,blackKing.y/64, true, true)){
-//                    System.out.println("this be the square of check for the king "+ blackKing.x/64 + " " + blackKing.y/64 + " " + tempPiece.name);
-//                    checkB = true;
-//                    returnValue = true;
-//                }
-//            }
-//            else{
-//                if(tempPiece.validMove(whiteKing.x/64,whiteKing.y/64, false, true)){
-//                    System.out.println(tempPiece.name + " takes white king");
-//                    checkW = true;
-//                    returnValue = true;
-//                }
-//            }
-//        }
-//
-//        selectedPieceOriginalXP = savedOriginalX;
-//        selectedPieceOriginalYP = savedOriginalY;
-//
         return returnValue;
     }
 
@@ -471,9 +418,11 @@ public class Board extends JPanel {
 
         if (numberOfCheckB>0 && numberOfCheckB == numberOfMovesB && !isPossibleMovesToPreventCheckMateB()){
             System.out.println("black in checkmate");
+            checkMateB = true;
         }
         if (numberOfCheckW>0 && numberOfCheckW == numberOfMovesW && !isPossibleMovesToPreventCheckMateW()){
             System.out.println("white in checkmate");
+            checkMateW = true;
         }
 
 
